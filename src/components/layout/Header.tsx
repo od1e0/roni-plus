@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { useAccessibility } from '../../contexts/AccessibilityContext';
-import AccessibilityPanel from '../accessibility/AccessibilityPanel';
 
 interface HeaderProps {
   logo?: string;
@@ -8,8 +6,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ logo }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { isAccessibilityPanelOpen, openAccessibilityPanel } = useAccessibility();
-  
+
   return (
     <header className="sticky top-0 z-50 w-full bg-white text-neutral-800 shadow-md py-2">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -203,7 +200,6 @@ const Header: React.FC<HeaderProps> = ({ logo }) => {
         </div>
       </div>
       
-      {isAccessibilityPanelOpen && <AccessibilityPanel />}
     </header>
   );
 };

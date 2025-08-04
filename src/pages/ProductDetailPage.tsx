@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import type { Product } from '../types';
-import { useParams } from 'react-router-dom';
 
 const ProductDetailPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  // const { id } = useParams<{ id: string }>();
   const [activeImage, setActiveImage] = useState<number>(0);
   
   // Mock data for demonstration
