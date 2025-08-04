@@ -1,0 +1,139 @@
+/* Blind Mode Styles */
+.blind-mode {
+  --bg-color: white;
+  --text-color: black;
+  --heading-color: black;
+  --link-color: blue;
+  --link-hover-color: darkblue;
+  --border-color: black;
+  
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+.blind-mode h1, 
+.blind-mode h2, 
+.blind-mode h3, 
+.blind-mode h4, 
+.blind-mode h5, 
+.blind-mode h6 {
+  color: var(--heading-color);
+}
+
+.blind-mode a {
+  color: var(--link-color);
+  text-decoration: underline;
+}
+
+.blind-mode a:hover {
+  color: var(--link-hover-color);
+}
+
+.blind-mode button {
+  border: 2px solid var(--border-color);
+}
+
+/* High Contrast Mode */
+.high-contrast {
+  --bg-color: black;
+  --text-color: white;
+  --heading-color: white;
+  --link-color: yellow;
+  --link-hover-color: #ffff80;
+  --border-color: white;
+  
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+.high-contrast h1, 
+.high-contrast h2, 
+.high-contrast h3, 
+.high-contrast h4, 
+.high-contrast h5, 
+.high-contrast h6 {
+  color: var(--heading-color);
+}
+
+.high-contrast a {
+  color: var(--link-color);
+  text-decoration: underline;
+}
+
+.high-contrast a:hover {
+  color: var(--link-hover-color);
+}
+
+.high-contrast button {
+  border: 2px solid var(--border-color);
+}
+
+.high-contrast img {
+  filter: grayscale(100%) contrast(120%);
+}
+
+/* Focus styles for accessibility */
+a:focus,
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 3px solid #3D5A80;
+  outline-offset: 2px;
+}
+
+.high-contrast a:focus,
+.high-contrast button:focus,
+.high-contrast input:focus,
+.high-contrast select:focus,
+.high-contrast textarea:focus {
+  outline: 3px solid yellow;
+  outline-offset: 2px;
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideUp {
+  animation: slideUp 0.5s ease-out;
+}
+
+/* Accessibility skip link */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  z-index: 999;
+  padding: 1em;
+  background: #3D5A80;
+  color: white;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.skip-to-content:focus {
+  left: 50%;
+  transform: translateX(-50%);
+  top: 10px;
+}
