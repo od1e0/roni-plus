@@ -615,7 +615,7 @@ const TestimonialCard: React.FC<{
   content: string;
   featured?: boolean;
   image?: string;
-}> = ({ name, role, content, featured = false, image }) => (
+}> = ({ name, role, content, featured = false }) => (
   <div className={`rounded-2xl p-8 ${
     featured 
       ? 'bg-primary text-white shadow-lg transform md:-translate-y-4' 
