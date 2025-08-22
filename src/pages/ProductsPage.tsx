@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ProductCard from "../components/product/ProductCard";
 import type { Product, Category } from "../types";
+import { API_BASE_URL } from "../config/api";
 
 const ProductsPage: React.FC = () => {
   const { categoryId } = useParams<{ categoryId?: string }>();
@@ -26,7 +27,7 @@ const ProductsPage: React.FC = () => {
     const fetchCategories = async () => {
       try {
         const categoriesResponse = await fetch(
-          "http://localhost:3000/api/categories"
+          `${API_BASE_URL}/categories`
         );
         if (!categoriesResponse.ok) {
           throw new Error("Ошибка при загрузке категорий");
@@ -76,7 +77,7 @@ const ProductsPage: React.FC = () => {
       try {
         setIsLoading(true);
         const productsResponse = await fetch(
-          "http://localhost:3000/api/products"
+          `${API_BASE_URL}/products`
         );
         if (!productsResponse.ok) {
           throw new Error("Ошибка при загрузке товаров");
