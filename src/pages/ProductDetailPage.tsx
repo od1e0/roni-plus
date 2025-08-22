@@ -1,36 +1,83 @@
-import React, { useState } from 'react';
-import type { Product } from '../types';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import type { Product, Category, CalculatorOrderData } from '../types';
+import { ProductService, CategoryService } from '../services/api';
+import ProductCalculator from '../components/ProductCalculator';
+import OrderModal from '../components/OrderModal';
 
 const ProductDetailPage: React.FC = () => {
-  // const { id } = useParams<{ id: string }>();
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [activeImage, setActiveImage] = useState<number>(0);
   
-  // Mock data for demonstration
-  const product: Product = {
-    id: '1',
-    name: 'О-1',
-    category: 'single',
-    price: 1433.25,
-    imageUrl: '/images/products/o-1.jpg',
-    description: 'Одиночный памятник из черного гранита',
-    materials: ['Черный гранит'],
-    dimensions: {
-      width: 100,
-      height: 120,
-      depth: 50,
-    }
-  };
-
-  // Mock additional images
-  const additionalImages = [
-    '/images/products/o-1.jpg',
-    '/images/products/o-1-side.jpg',
-    '/images/products/o-1-back.jpg',
-    '/images/products/o-1-detail.jpg',
-  ];
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoadingRelated, setIsLoadingRelated] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState<boolean>(false);
+  const [calculatorOrderData, setCalculatorOrderData] = useState<CalculatorOrderData | undefined>(undefined);
+  
+  // Fetch product data from the API
+  useEffect(() => {
+    const fetchProductData = async () => {
+      if (!id) return;
+      
+      try {
+        setIsLoading(true);
+        
+        // Fetch categories first
+        try {
+          const categoriesData = await CategoryService.getAllCategories();
+          setCategories(categoriesData);
+        } catch (categoriesError) {
+          console.log('Could not fetch categories:', categoriesError);
+          setCategories([]);
+        }
+        
+        const productData = await ProductService.getProduct(id);
+        setProduct(productData);
+        
+        // Fetch related products (same category)
+        if (productData.category) {
+          setIsLoadingRelated(true);
+          try {
+            const relatedData = await ProductService.getProductsByCategory(productData.category);
+            // Filter out the current product and limit to 4
+            const filtered = relatedData
+              .filter((p: { id: string; }) => p.id !== id)
+              .slice(0, 4);
+              
+            setRelatedProducts(filtered);
+          } catch (relatedError) {
+            console.log('Could not fetch related products:', relatedError);
+            // If we can't fetch related products, we'll show an empty state
+            setRelatedProducts([]);
+          } finally {
+            setIsLoadingRelated(false);
+          }
+        }
+      } catch (err) {
+        setError('Не удалось загрузить данные о товаре');
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchProductData();
+  }, [id]);
 
   // Get category label
   const getCategoryLabel = (category: string) => {
+    // First try to find in API categories
+    const apiCategory = categories.find(cat => cat.id === category);
+    if (apiCategory) {
+      return apiCategory.name;
+    }
+    
+    // Fallback to hardcoded categories
     switch (category) {
       case 'single': return 'Одиночный';
       case 'double': return 'Двойной';
@@ -44,6 +91,39 @@ const ProductDetailPage: React.FC = () => {
       default: return category;
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-4">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-red-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h2 className="text-2xl font-bold text-neutral-900 mb-2">
+          {error || 'Товар не найден'}
+        </h2>
+        <p className="text-neutral-600 mb-4">К сожалению, запрашиваемый товар недоступен.</p>
+        <button 
+          onClick={() => navigate('/products')}
+          className="btn-primary px-6 py-2"
+        >
+          Вернуться в каталог
+        </button>
+      </div>
+    );
+  }
+  
+  // Get images array from the product
+  const productImages = product.images && product.images.length > 0 ? 
+    product.images : 
+    [ ''];  // Fallback for old product format
 
   return (
     <>
@@ -73,7 +153,7 @@ const ProductDetailPage: React.FC = () => {
               <div className="lg:w-1/2 mb-8 lg:mb-0">
                 <div className="relative aspect-w-4 aspect-h-3 bg-neutral-100 rounded-xl overflow-hidden mb-4">
                   <img 
-                    src={additionalImages[activeImage]} 
+                    src={productImages[activeImage]} 
                     alt={`${product.name} - изображение ${activeImage + 1}`} 
                     className="object-cover w-full h-full"
                   />
@@ -81,7 +161,7 @@ const ProductDetailPage: React.FC = () => {
                   {/* Image navigation buttons */}
                   <div className="absolute inset-0 flex items-center justify-between px-4">
                     <button 
-                      onClick={() => setActiveImage(prev => (prev === 0 ? additionalImages.length - 1 : prev - 1))}
+                      onClick={() => setActiveImage(prev => (prev === 0 ? productImages.length - 1 : prev - 1))}
                       className="bg-white/70 hover:bg-white text-neutral-800 w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-sm"
                       aria-label="Предыдущее изображение"
                     >
@@ -90,7 +170,7 @@ const ProductDetailPage: React.FC = () => {
                       </svg>
                     </button>
                     <button 
-                      onClick={() => setActiveImage(prev => (prev === additionalImages.length - 1 ? 0 : prev + 1))}
+                      onClick={() => setActiveImage(prev => (prev === productImages.length - 1 ? 0 : prev + 1))}
                       className="bg-white/70 hover:bg-white text-neutral-800 w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-sm"
                       aria-label="Следующее изображение"
                     >
@@ -102,13 +182,13 @@ const ProductDetailPage: React.FC = () => {
                   
                   {/* Image counter indicator */}
                   <div className="absolute bottom-4 right-4 bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
-                    {activeImage + 1} / {additionalImages.length}
+                    {activeImage + 1} / {productImages.length}
                   </div>
                 </div>
 
                 {/* Thumbnails */}
                 <div className="flex gap-3 overflow-x-auto pb-2">
-                  {additionalImages.map((img, index) => (
+                  {productImages.map((img, index) => (
                     <button 
                       key={index}
                       onClick={() => setActiveImage(index)}
@@ -130,18 +210,18 @@ const ProductDetailPage: React.FC = () => {
               <div className="lg:w-1/2">
                 {/* Category badge */}
                 <div className="mb-4">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-light/20 text-primary-dark">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-light/20 text-primary-dark break-words text-center max-w-32">
                     {getCategoryLabel(product.category)}
                   </span>
                 </div>
 
                 {/* Product title */}
-                <h1 className="text-3xl sm:text-4xl font-bold font-heading text-neutral-900 mb-4">
+                <h1 className="text-3xl sm:text-4xl font-bold font-heading text-neutral-900 mb-4 break-words leading-tight">
                   {product.name}
                 </h1>
                 
                 {/* Description */}
-                <p className="text-lg text-neutral-600 mb-8 leading-relaxed">
+                <p className="text-lg text-neutral-600 mb-8 leading-relaxed break-words">
                   {product.description}
                 </p>
 
@@ -150,33 +230,53 @@ const ProductDetailPage: React.FC = () => {
                   <h2 className="text-xl font-bold text-neutral-900 mb-4">Характеристики</h2>
                   <div className="bg-neutral-50 rounded-xl p-5 border border-neutral-200">
                     <dl className="space-y-3">
-                      {product.materials && (
+                      {product.material && (
                         <div className="grid grid-cols-2">
-                          <dt className="text-neutral-600">Материалы:</dt>
-                          <dd className="font-medium text-neutral-900">{product.materials.join(', ')}</dd>
+                          <dt className="text-neutral-600">Материал:</dt>
+                          <dd className="font-medium text-neutral-900 break-words">{product.material}</dd>
                         </div>
                       )}
-                      {product.dimensions && (
-                        <>
-                          {product.dimensions.width && (
-                            <div className="grid grid-cols-2">
-                              <dt className="text-neutral-600">Ширина:</dt>
-                              <dd className="font-medium text-neutral-900">{product.dimensions.width} см</dd>
-                            </div>
-                          )}
-                          {product.dimensions.height && (
-                            <div className="grid grid-cols-2">
-                              <dt className="text-neutral-600">Высота:</dt>
-                              <dd className="font-medium text-neutral-900">{product.dimensions.height} см</dd>
-                            </div>
-                          )}
-                          {product.dimensions.depth && (
-                            <div className="grid grid-cols-2">
-                              <dt className="text-neutral-600">Глубина:</dt>
-                              <dd className="font-medium text-neutral-900">{product.dimensions.depth} см</dd>
-                            </div>
-                          )}
-                        </>
+                      {product.type && (
+                        <div className="grid grid-cols-2">
+                          <dt className="text-neutral-600">Тип:</dt>
+                          <dd className="font-medium text-neutral-900 break-words">{product.type}</dd>
+                        </div>
+                      )}
+                      {product.color && (
+                        <div className="grid grid-cols-2">
+                          <dt className="text-neutral-600">Цвет:</dt>
+                          <dd className="font-medium text-neutral-900 break-words">{product.color}</dd>
+                        </div>
+                      )}
+                      {product.finish && (
+                        <div className="grid grid-cols-2">
+                          <dt className="text-neutral-600">Отделка:</dt>
+                          <dd className="font-medium text-neutral-900 break-words">{product.finish}</dd>
+                        </div>
+                      )}
+                      {product.width && (
+                        <div className="grid grid-cols-2">
+                          <dt className="text-neutral-600">Ширина:</dt>
+                          <dd className="font-medium text-neutral-900">{product.width} см</dd>
+                        </div>
+                      )}
+                      {product.height && (
+                        <div className="grid grid-cols-2">
+                          <dt className="text-neutral-600">Высота:</dt>
+                          <dd className="font-medium text-neutral-900">{product.height} см</dd>
+                        </div>
+                      )}
+                      {product.depth && (
+                        <div className="grid grid-cols-2">
+                          <dt className="text-neutral-600">Глубина:</dt>
+                          <dd className="font-medium text-neutral-900">{product.depth} см</dd>
+                        </div>
+                      )}
+                      {product.weight && (
+                        <div className="grid grid-cols-2">
+                          <dt className="text-neutral-600">Вес:</dt>
+                          <dd className="font-medium text-neutral-900">{product.weight} кг</dd>
+                        </div>
                       )}
                     </dl>
                   </div>
@@ -191,9 +291,6 @@ const ProductDetailPage: React.FC = () => {
                         <h3 className="text-3xl font-bold text-neutral-900 mr-3">
                           {product.price > 0 ? `${product.price.toFixed(2)} руб.` : 'По запросу'}
                         </h3>
-                        {product.price > 0 && (
-                          <span className="text-neutral-500">с установкой</span>
-                        )}
                       </div>
                     </div>
                     <div className="text-xs text-neutral-500 mt-2 sm:mt-0">
@@ -204,15 +301,15 @@ const ProductDetailPage: React.FC = () => {
 
                 {/* Actions */}
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <a 
-                    href="/order-form"
+                  <button 
+                    onClick={() => setIsOrderModalOpen(true)}
                     className="btn-primary flex-1 py-3 text-center flex items-center justify-center"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
-                    Заказать памятник
-                  </a>
+                    Оставить заявку
+                  </button>
                   <a 
                     href="tel:+375297912384" 
                     className="btn-secondary flex-1 py-3 text-center flex items-center justify-center"
@@ -229,10 +326,32 @@ const ProductDetailPage: React.FC = () => {
         </div>
       </section>
 
+      {/* Product Calculator */}
+      <section className="py-10 sm:py-12">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                      <ProductCalculator 
+              onAddToOrder={(selections) => {
+                console.log('Order selections:', selections);
+                // Здесь можно добавить логику для отправки заказа
+                alert('Заказ добавлен! Общая стоимость: ' + 
+                  selections.reduce((sum, s) => sum + s.totalPrice, 0).toFixed(2) + ' руб.');
+              }}
+              onOpenOrderModal={(calculatorData) => {
+                setCalculatorOrderData(calculatorData);
+                setIsOrderModalOpen(true);
+              }}
+              onOrderSubmitted={() => {
+                // Сбрасываем данные калькулятора после успешной отправки заявки
+                setCalculatorOrderData(undefined);
+              }}
+            />
+        </div>
+      </section>
+
       {/* Additional Information Tabs */}
       <section className="py-10 sm:py-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <ProductInfoTabs />
+          <ProductInfoTabs product={product} />
         </div>
       </section>
       
@@ -243,27 +362,88 @@ const ProductDetailPage: React.FC = () => {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Display related product cards here */}
-            {[1, 2, 3, 4].map((num) => (
-              <div key={num} className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
-                <div className="aspect-w-3 aspect-h-2 bg-neutral-100">
-                  <div className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-100 animate-pulse"></div>
+            {isLoadingRelated ? (
+              // Loading skeleton for related products
+              [1, 2, 3, 4].map((num) => (
+                <div key={num} className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
+                  <div className="aspect-w-3 aspect-h-2 bg-neutral-100">
+                    <div className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-100 animate-pulse"></div>
+                  </div>
+                  <div className="p-4">
+                    <div className="h-6 bg-neutral-200 rounded w-2/3 mb-2 animate-pulse"></div>
+                    <div className="h-4 bg-neutral-200 rounded w-1/2 mb-4 animate-pulse"></div>
+                    <div className="h-8 bg-neutral-200 rounded w-1/3 animate-pulse"></div>
+                  </div>
                 </div>
-                <div className="p-4">
-                  <div className="h-6 bg-neutral-200 rounded w-2/3 mb-2 animate-pulse"></div>
-                  <div className="h-4 bg-neutral-200 rounded w-1/2 mb-4 animate-pulse"></div>
-                  <div className="h-8 bg-neutral-200 rounded w-1/3 animate-pulse"></div>
+              ))
+            ) : relatedProducts.length > 0 ? (
+              relatedProducts.map((relatedProduct) => (
+                <a 
+                  href={`/products/detail/${relatedProduct.id}`}
+                  key={relatedProduct.id} 
+                  className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden hover:shadow-md transition-shadow"
+                >
+                  <div className="aspect-w-3 aspect-h-2 bg-neutral-100">
+                    <img 
+                      src={(relatedProduct.images && relatedProduct.images[0]) || ''}
+                      alt={relatedProduct.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-medium text-lg mb-1">{relatedProduct.name}</h3>
+                    <p className="text-sm text-neutral-600 mb-2">{getCategoryLabel(relatedProduct.category)}</p>
+                    <p className="font-bold text-lg">{relatedProduct.price.toFixed(2)} руб.</p>
+                  </div>
+                </a>
+              ))
+            ) : (
+              // Show message when no related products are available
+              <div className="col-span-full text-center py-12">
+                <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-8">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-neutral-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                  <h3 className="text-lg font-medium text-neutral-900 mb-2">Нет похожих памятников</h3>
+                  <p className="text-neutral-600 mb-6">В данной категории пока нет других памятников</p>
+                  <a 
+                    href="/products" 
+                    className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                  >
+                    Посмотреть все памятники
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </a>
                 </div>
               </div>
-            ))}
+            )}
           </div>
-        </div>
-      </section>
-    </>
-  );
-};
+                 </div>
+       </section>
+       
+             {/* Order Modal */}
+      <OrderModal 
+        isOpen={isOrderModalOpen} 
+        onClose={() => {
+          setIsOrderModalOpen(false);
+          setCalculatorOrderData(undefined);
+        }} 
+        calculatorData={calculatorOrderData}
+        onCalculatorReset={() => {
+          setCalculatorOrderData(undefined);
+          // Здесь можно также сбросить данные в калькуляторе, если нужно
+        }}
+        onOrderSubmitted={() => {
+          setCalculatorOrderData(undefined);
+        }}
+      />
+     </>
+   );
+ };
 
 // Product Info Tabs Component
-const ProductInfoTabs: React.FC = () => {
+const ProductInfoTabs: React.FC<{ product: Product }> = ({ product }) => {
   const [activeTab, setActiveTab] = useState<string>('description');
   
   return (
@@ -301,29 +481,23 @@ const ProductInfoTabs: React.FC = () => {
         {activeTab === 'description' && (
           <div className="space-y-4">
             <h3 className="text-lg font-bold text-neutral-900">Детальное описание памятника</h3>
-            <p>
-              Памятник представляет собой классическую вертикальную стелу из высококачественного черного гранита. 
-              Изделие отличается элегантной простотой форм и традиционным дизайном, что делает его универсальным 
-              решением для установки на любом кладбище.
-            </p>
-            <p>
-              Поверхность памятника тщательно отполирована до зеркального блеска, что придает изделию благородный внешний вид 
-              и обеспечивает дополнительную защиту от атмосферных воздействий.
-            </p>
-            <p>
-              На лицевой стороне памятника возможно нанесение портрета, эпитафии, имени и дат усопшего. 
-              Гравировка выполняется современным оборудованием, что гарантирует высокое качество и долговечность изображения.
-            </p>
-            <div>
-              <h4 className="text-md font-bold text-neutral-900 mb-2">Возможные варианты оформления:</h4>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>Фотогравировка портрета</li>
-                <li>Художественная гравировка с объемным эффектом</li>
-                <li>Нанесение эпитафии любой сложности</li>
-                <li>Декоративные элементы (розы, кресты, ангелы и т.д.)</li>
-                <li>Золочение текста и элементов декора</li>
-              </ul>
-            </div>
+            {product.description ? (
+              <div>
+                <p>{product.description}</p>
+                <div>
+                  <h4 className="text-md font-bold text-neutral-900 mb-2">Возможные варианты оформления:</h4>
+                  <ul className="list-disc pl-5 space-y-1">
+                    <li>Фотогравировка портрета</li>
+                    <li>Художественная гравировка с объемным эффектом</li>
+                    <li>Нанесение эпитафии любой сложности</li>
+                    <li>Декоративные элементы (розы, кресты, ангелы и т.д.)</li>
+                    <li>Золочение текста и элементов декора</li>
+                  </ul>
+                </div>
+              </div>
+            ) : (
+              <p className="text-neutral-500">Описание товара отсутствует</p>
+            )}
           </div>
         )}
         
@@ -333,40 +507,56 @@ const ProductInfoTabs: React.FC = () => {
             <div className="bg-neutral-50 rounded-xl p-5 border border-neutral-200">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-3">
-                  <div className="grid grid-cols-2">
-                    <dt className="text-neutral-600">Материал:</dt>
-                    <dd className="font-medium text-neutral-900">Черный гранит</dd>
-                  </div>
-                  <div className="grid grid-cols-2">
-                    <dt className="text-neutral-600">Тип:</dt>
-                    <dd className="font-medium text-neutral-900">Одиночный</dd>
-                  </div>
-                  <div className="grid grid-cols-2">
-                    <dt className="text-neutral-600">Цвет:</dt>
-                    <dd className="font-medium text-neutral-900">Черный</dd>
-                  </div>
-                  <div className="grid grid-cols-2">
-                    <dt className="text-neutral-600">Отделка:</dt>
-                    <dd className="font-medium text-neutral-900">Полировка</dd>
-                  </div>
+                  {product.material && (
+                    <div className="grid grid-cols-2">
+                      <dt className="text-neutral-600">Материал:</dt>
+                      <dd className="font-medium text-neutral-900">{product.material}</dd>
+                    </div>
+                  )}
+                  {product.type && (
+                    <div className="grid grid-cols-2">
+                      <dt className="text-neutral-600">Тип:</dt>
+                      <dd className="font-medium text-neutral-900">{product.type}</dd>
+                    </div>
+                  )}
+                  {product.color && (
+                    <div className="grid grid-cols-2">
+                      <dt className="text-neutral-600">Цвет:</dt>
+                      <dd className="font-medium text-neutral-900">{product.color}</dd>
+                    </div>
+                  )}
+                  {product.finish && (
+                    <div className="grid grid-cols-2">
+                      <dt className="text-neutral-600">Отделка:</dt>
+                      <dd className="font-medium text-neutral-900">{product.finish}</dd>
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-3">
-                  <div className="grid grid-cols-2">
-                    <dt className="text-neutral-600">Ширина:</dt>
-                    <dd className="font-medium text-neutral-900">100 см</dd>
-                  </div>
-                  <div className="grid grid-cols-2">
-                    <dt className="text-neutral-600">Высота:</dt>
-                    <dd className="font-medium text-neutral-900">120 см</dd>
-                  </div>
-                  <div className="grid grid-cols-2">
-                    <dt className="text-neutral-600">Глубина:</dt>
-                    <dd className="font-medium text-neutral-900">50 см</dd>
-                  </div>
-                  <div className="grid grid-cols-2">
-                    <dt className="text-neutral-600">Вес:</dt>
-                    <dd className="font-medium text-neutral-900">~350 кг</dd>
-                  </div>
+                  {product.width && (
+                    <div className="grid grid-cols-2">
+                      <dt className="text-neutral-600">Ширина:</dt>
+                      <dd className="font-medium text-neutral-900">{product.width} см</dd>
+                    </div>
+                  )}
+                  {product.height && (
+                    <div className="grid grid-cols-2">
+                      <dt className="text-neutral-600">Высота:</dt>
+                      <dd className="font-medium text-neutral-900">{product.height} см</dd>
+                    </div>
+                  )}
+                  {product.depth && (
+                    <div className="grid grid-cols-2">
+                      <dt className="text-neutral-600">Глубина:</dt>
+                      <dd className="font-medium text-neutral-900">{product.depth} см</dd>
+                    </div>
+                  )}
+                  {product.weight && (
+                    <div className="grid grid-cols-2">
+                      <dt className="text-neutral-600">Вес:</dt>
+                      <dd className="font-medium text-neutral-900">{product.weight} кг</dd>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

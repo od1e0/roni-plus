@@ -1,48 +1,78 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ProductCard from '../components/product/ProductCard';
 import { Product } from '../types';
+import { ProductService, WorksService } from '../services/api';
+import OrderForm from '../components/OrderForm';
+
+interface Work {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+}
 
 const HomePage: React.FC = () => {
-  // Products with real image URLs
-  const featuredProducts: Product[] = [
-    {
-      id: '1',
-      name: 'О-1',
-      category: 'single',
-      price: 1433.25,
-      imageUrl: 'https://www.roni.by/storage/products/January2022/ZMjLrofOkhqPdNHLDRfE.jpg',
-      description: 'Одиночный памятник из черного гранита',
-      materials: ['Черный гранит'],
-      dimensions: {
-        width: 100,
-        height: 120,
-        depth: 50,
+  const [recentProducts, setRecentProducts] = useState<Product[]>([]);
+  const [works, setWorks] = useState<Work[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Fetch recent products and works from API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Fetch products
+        const productsData = await ProductService.getAllProducts();
+        // Take the 3 most recent products
+        const recent = productsData.slice(0, 3);
+        setRecentProducts(recent);
+        
+        // Fetch works using the service
+        try {
+          const worksData = await WorksService.getAllWorks();
+          setWorks(worksData);
+        } catch (worksError) {
+          console.log('Works data not available yet:', worksError);
+          // Use placeholder data for works if API not ready
+          setWorks([
+            {
+              id: '1',
+              title: 'Памятник из гранита',
+              description: 'Одиночный памятник из черного гранита с гравировкой',
+              imageUrl: 'https://www.roni.by/storage/products/October2022/6zwKri3lTZMLzl0RWRJE.jpg'
+            },
+            {
+              id: '2',
+              title: 'Комплекс из гранита',
+              description: 'Двойной памятник с оградой и благоустройством',
+              imageUrl: 'https://www.roni.by/storage/products/October2022/ZZqLBdK5TrDO3f9VtmBE.jpg'
+            },
+            {
+              id: '3',
+              title: 'Эксклюзивный памятник',
+              description: 'Индивидуальный дизайн с резными элементами',
+              imageUrl: 'https://www.roni.by/storage/products/October2022/luDrZZlgSNIdmwxt6JRa.jpg'
+            },
+            {
+              id: '4',
+              title: 'Памятник с фотогравировкой',
+              description: 'Детализированная гравировка портрета',
+              imageUrl: 'https://www.roni.by/storage/products/January2022/TlkKyrxYJq6mvTjcWYvi.jpg'
+            }
+          ]);
+        }
+      } catch (err) {
+        setError('Не удалось загрузить данные');
+        console.error(err);
+      } finally {
+        setIsLoading(false);
       }
-    },
-    {
-      id: '2',
-      name: 'Э-1',
-      category: 'exclusive',
-      price: 0.00,
-      imageUrl: 'https://www.roni.by/storage/products/January2022/xdExvsztjZeOzemgXAv9.jpg',
-      description: 'Эксклюзивный памятник из гранита и бронзы',
-      materials: ['Гранит', 'Бронза'],
-    },
-    {
-      id: '3',
-      name: 'ДВ-1',
-      category: 'double',
-      price: 1651.65,
-      imageUrl: 'https://www.roni.by/storage/products/January2022/uafQclhLRg5t7MZr5E2e.jpg',
-      description: 'Двойной памятник из черного гранита',
-      materials: ['Черный гранит'],
-      dimensions: {
-        width: 180,
-        height: 120,
-        depth: 50,
-      }
-    }
-  ];
+    };
+    
+    fetchData();
+  }, []);
 
   return (
     <>
@@ -147,9 +177,33 @@ const HomePage: React.FC = () => {
           </div>
           
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+            {isLoading ? (
+              // Loading placeholders
+              [...Array(3)].map((_, index) => (
+                <div key={index} className="bg-white rounded-xl shadow-sm overflow-hidden border border-neutral-200">
+                  <div className="aspect-w-3 aspect-h-2 bg-neutral-100">
+                    <div className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-100 animate-pulse"></div>
+                  </div>
+                  <div className="p-4">
+                    <div className="h-6 bg-neutral-200 rounded w-2/3 mb-2 animate-pulse"></div>
+                    <div className="h-4 bg-neutral-200 rounded w-1/2 mb-4 animate-pulse"></div>
+                    <div className="h-8 bg-neutral-200 rounded w-1/3 animate-pulse"></div>
+                  </div>
+                </div>
+              ))
+            ) : error ? (
+              <div className="col-span-3 py-10 text-center">
+                <p className="text-red-500">{error}</p>
+              </div>
+            ) : recentProducts.length === 0 ? (
+              <div className="col-span-3 py-10 text-center">
+                <p className="text-neutral-500">Нет доступных товаров</p>
+              </div>
+            ) : (
+              recentProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))
+            )}
           </div>
           
           <div className="text-center mt-12">
@@ -243,70 +297,43 @@ const HomePage: React.FC = () => {
           <div className="relative">
             <div className="overflow-hidden">
               <div className="flex transition-transform duration-500 ease-in-out" style={{ transform: 'translateX(0%)' }} id="worksCarousel">
-                {/* Work Items - Will be controlled by JavaScript */}
-                <div className="w-full md:w-1/2 lg:w-1/3 flex-shrink-0 px-3">
-                  <div className="rounded-xl overflow-hidden shadow-md mb-4 bg-white">
-                    <div className="relative pt-[75%]">
-                      <img 
-                        src="https://www.roni.by/storage/products/October2022/6zwKri3lTZMLzl0RWRJE.jpg"
-                        alt="Работа 1" 
-                        className="absolute top-0 left-0 w-full h-full object-cover"
-                      />
+                {/* Work Items */}
+                {isLoading ? (
+                  // Loading placeholders
+                  [...Array(4)].map((_, index) => (
+                    <div key={index} className="w-full md:w-1/2 lg:w-1/3 flex-shrink-0 px-3">
+                      <div className="rounded-xl overflow-hidden shadow-md mb-4 bg-white">
+                        <div className="relative pt-[75%] bg-neutral-100 animate-pulse"></div>
+                        <div className="p-4">
+                          <div className="h-5 bg-neutral-200 rounded w-2/3 mb-2 animate-pulse"></div>
+                          <div className="h-4 bg-neutral-200 rounded w-full animate-pulse"></div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="p-4">
-                      <h4 className="font-bold text-neutral-800">Памятник из гранита</h4>
-                      <p className="text-neutral-600 text-sm mt-2">Одиночный памятник из черного гранита с гравировкой</p>
-                    </div>
+                  ))
+                ) : works.length === 0 ? (
+                  <div className="w-full text-center py-10">
+                    <p className="text-neutral-500">Нет доступных работ</p>
                   </div>
-                </div>
-                
-                <div className="w-full md:w-1/2 lg:w-1/3 flex-shrink-0 px-3">
-                  <div className="rounded-xl overflow-hidden shadow-md mb-4 bg-white">
-                    <div className="relative pt-[75%]">
-                      <img 
-                        src="https://www.roni.by/storage/products/October2022/ZZqLBdK5TrDO3f9VtmBE.jpg" 
-                        alt="Работа 2" 
-                        className="absolute top-0 left-0 w-full h-full object-cover"
-                      />
+                ) : (
+                  works.map((work) => (
+                    <div key={work.id} className="w-full md:w-1/2 lg:w-1/3 flex-shrink-0 px-3">
+                      <div className="rounded-xl overflow-hidden shadow-md mb-4 bg-white">
+                        <div className="relative pt-[75%]">
+                          <img 
+                            src={work.imageUrl}
+                            alt={work.title} 
+                            className="absolute top-0 left-0 w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h4 className="font-bold text-neutral-800">{work.title}</h4>
+                          <p className="text-neutral-600 text-sm mt-2">{work.description}</p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="p-4">
-                      <h4 className="font-bold text-neutral-800">Комплекс из гранита</h4>
-                      <p className="text-neutral-600 text-sm mt-2">Двойной памятник с оградой и благоустройством</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="w-full md:w-1/2 lg:w-1/3 flex-shrink-0 px-3">
-                  <div className="rounded-xl overflow-hidden shadow-md mb-4 bg-white">
-                    <div className="relative pt-[75%]">
-                      <img 
-                        src="https://www.roni.by/storage/products/October2022/luDrZZlgSNIdmwxt6JRa.jpg" 
-                        alt="Работа 3" 
-                        className="absolute top-0 left-0 w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="p-4">
-                      <h4 className="font-bold text-neutral-800">Эксклюзивный памятник</h4>
-                      <p className="text-neutral-600 text-sm mt-2">Индивидуальный дизайн с резными элементами</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="w-full md:w-1/2 lg:w-1/3 flex-shrink-0 px-3">
-                  <div className="rounded-xl overflow-hidden shadow-md mb-4 bg-white">
-                    <div className="relative pt-[75%]">
-                      <img 
-                        src="https://www.roni.by/storage/products/January2022/TlkKyrxYJq6mvTjcWYvi.jpg" 
-                        alt="Работа 4" 
-                        className="absolute top-0 left-0 w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="p-4">
-                      <h4 className="font-bold text-neutral-800">Памятник с фотогравировкой</h4>
-                      <p className="text-neutral-600 text-sm mt-2">Детализированная гравировка портрета</p>
-                    </div>
-                  </div>
-                </div>
+                  ))
+                )}
               </div>
             </div>
             
@@ -479,43 +506,11 @@ const HomePage: React.FC = () => {
 
             {/* Contact form and map */}
             <div className="lg:col-span-2">
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-full">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 h-full">
                 <div className="bg-white rounded-2xl shadow-card p-6 md:p-8">
                   <h3 className="text-xl font-bold font-heading text-neutral-800 mb-6">Оставьте заявку</h3>
                   
-                  <form className="space-y-4">
-                    <div>
-                      <label htmlFor="name" className="form-label">Имя</label>
-                      <input 
-                        type="text" 
-                        id="name"
-                        className="form-input" 
-                        placeholder="Ваше имя"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="phone" className="form-label">Телефон</label>
-                      <input 
-                        type="tel" 
-                        id="phone"
-                        className="form-input" 
-                        placeholder="+375 (XX) XXX XX XX"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="message" className="form-label">Сообщение</label>
-                      <textarea 
-                        id="message"
-                        className="form-input h-32" 
-                        placeholder="Ваш вопрос или комментарий"
-                      ></textarea>
-                    </div>
-                    <div className="pt-2">
-                      <button type="submit" className="btn-primary w-full">
-                        Отправить
-                      </button>
-                    </div>
-                  </form>
+                  <OrderForm />
                 </div>
                 
                 <div className="rounded-2xl overflow-hidden shadow-card h-full bg-neutral-100 flex flex-col">
@@ -551,44 +546,7 @@ const HomePage: React.FC = () => {
         </div>
       </section>
       
-      {/* CTA Section */}
-      <section className="bg-primary">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
-          <div className="lg:flex lg:items-center lg:justify-between">
-            <div className="flex flex-row items-center">
-              <div className="hidden sm:block mr-8">
-                <img 
-                  src="https://images.unsplash.com/photo-1682913958782-e94ea00a0050?q=80&w=200" 
-                  alt="Консультация специалиста" 
-                  className="h-24 w-24 object-cover rounded-full border-4 border-white shadow-md"
-                />
-              </div>
-              <div>
-                <h2 className="text-2xl sm:text-3xl font-bold font-heading text-white">
-                  Готовы заказать памятник?
-                </h2>
-                <p className="mt-2 text-white/80">
-                  Свяжитесь с нами для получения персональной консультации.
-                </p>
-              </div>
-            </div>
-            <div className="mt-8 flex lg:mt-0 lg:flex-shrink-0 gap-4">
-              <a
-                href="/products"
-                className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-lg text-primary bg-white hover:bg-gray-50 shadow-sm"
-              >
-                Каталог памятников
-              </a>
-              <a
-                href="/contact"
-                className="inline-flex items-center justify-center px-5 py-3 border border-white text-base font-medium rounded-lg text-white hover:bg-white hover:text-primary shadow-sm transition-colors"
-              >
-                Связаться с нами
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
+
     </>
   );
 };

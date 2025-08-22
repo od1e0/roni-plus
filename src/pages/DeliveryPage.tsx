@@ -35,8 +35,8 @@ const DeliveryPage: React.FC = () => {
       <section className="bg-gradient-to-r from-primary to-primary-dark text-white py-12 sm:py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading">Доставка и оплата</h1>
-            <p className="mt-4 text-lg text-white/80">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading break-words leading-tight">Доставка и оплата</h1>
+            <p className="mt-4 text-lg text-white/80 break-words leading-relaxed">
               Информация о способах оплаты, доставке и установке памятников
             </p>
           </div>
@@ -47,7 +47,7 @@ const DeliveryPage: React.FC = () => {
       <section className="py-12 sm:py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold font-heading text-neutral-900 mb-8">
+            <h2 className="text-3xl font-bold font-heading text-neutral-900 mb-8 break-words leading-tight">
               Способы оплаты
             </h2>
             
@@ -58,8 +58,8 @@ const DeliveryPage: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-bold text-neutral-900 mb-2">Наличный расчет</h3>
-                <p className="text-neutral-600">
+                <h3 className="text-lg font-bold text-neutral-900 mb-2 break-words leading-tight">Наличный расчет</h3>
+                <p className="text-neutral-600 break-words">
                   Оплата наличными в нашем офисе. При оплате наличными предоставляется скидка 3%.
                 </p>
               </div>
@@ -70,8 +70,8 @@ const DeliveryPage: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-bold text-neutral-900 mb-2">Банковские карты</h3>
-                <p className="text-neutral-600">
+                <h3 className="text-lg font-bold text-neutral-900 mb-2 break-words leading-tight">Банковские карты</h3>
+                <p className="text-neutral-600 break-words">
                   Принимаем к оплате карты Visa и MasterCard. Оплата производится через защищенный платежный терминал.
                 </p>
               </div>
@@ -82,8 +82,8 @@ const DeliveryPage: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-bold text-neutral-900 mb-2">Банковский перевод</h3>
-                <p className="text-neutral-600">
+                <h3 className="text-lg font-bold text-neutral-900 mb-2 break-words leading-tight">Банковский перевод</h3>
+                <p className="text-neutral-600 break-words">
                   Оплата по счету для юридических лиц или через интернет-банкинг для физических лиц. 
                   Реквизиты предоставляются при оформлении заказа.
                 </p>
@@ -95,8 +95,8 @@ const DeliveryPage: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-bold text-neutral-900 mb-2">Рассрочка</h3>
-                <p className="text-neutral-600">
+                <h3 className="text-lg font-bold text-neutral-900 mb-2 break-words leading-tight">Рассрочка</h3>
+                <p className="text-neutral-600 break-words">
                   Возможна оплата в рассрочку без процентов. Условия рассрочки обсуждаются индивидуально при заключении договора.
                 </p>
               </div>

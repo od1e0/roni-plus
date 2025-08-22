@@ -135,3 +135,206 @@
 .tablet-up {
   @apply hidden sm:block;
 }
+
+/* Custom animations for dropdown menu */
+@keyframes slideInFromTop {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-in {
+  animation: slideInFromTop 0.2s ease-out;
+}
+
+.slide-in-from-top-2 {
+  animation: slideInFromTop 0.2s ease-out;
+}
+
+.fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.slide-in-from-left {
+  animation: slideInFromLeft 0.3s ease-out;
+}
+
+/* Custom scrollbar for dropdown */
+.dropdown-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.dropdown-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dropdown-scrollbar::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 2px;
+}
+
+.dropdown-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Hover effects */
+.hover-lift {
+  transition: transform 0.2s ease-out;
+}
+
+.hover-lift:hover {
+  transform: translateY(-1px);
+}
+
+/* Gradient backgrounds */
+.gradient-primary {
+  background: linear-gradient(135deg, #3D5A80 0%, #98C1D9 100%);
+}
+
+.gradient-hover {
+  background: linear-gradient(135deg, rgba(61, 90, 128, 0.05) 0%, rgba(152, 193, 217, 0.1) 100%);
+}
+
+/* Mega menu specific styles */
+.mega-menu {
+  background: #ffffff;
+  backdrop-filter: none;
+}
+
+.mega-menu-column {
+  position: relative;
+}
+
+.mega-menu-column::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -1rem;
+  height: 100%;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.1), transparent);
+}
+
+.mega-menu-column:last-child::before {
+  display: none;
+}
+
+/* Enhanced hover effects for mega menu */
+.mega-menu-item {
+  position: relative;
+  transition: all 0.2s ease-out;
+}
+
+.mega-menu-item:hover {
+  transform: translateX(4px);
+}
+
+.mega-menu-item::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #3D5A80, #98C1D9);
+  transition: width 0.2s ease-out;
+}
+
+.mega-menu-item:hover::before {
+  width: 6px;
+}
+
+/* Image display styles */
+.service-image-container {
+  @apply relative overflow-hidden bg-neutral-50;
+}
+
+.service-image {
+  @apply w-full h-full object-contain;
+  transition: transform 0.3s ease-out;
+}
+
+.service-image:hover {
+  transform: scale(1.05);
+}
+
+.service-thumbnail {
+  @apply w-full h-full object-contain bg-neutral-50;
+  transition: all 0.2s ease-out;
+}
+
+.service-thumbnail:hover {
+  @apply bg-neutral-100;
+  transform: scale(1.1);
+}
+
+/* Admin image preview styles */
+.admin-image-preview {
+  @apply w-full h-24 object-contain bg-neutral-50 border rounded-md;
+  transition: all 0.2s ease-out;
+}
+
+.admin-image-preview:hover {
+  @apply bg-neutral-100;
+  transform: scale(1.02);
+}
+
+/* Service card styles */
+.service-card {
+  @apply bg-white rounded-2xl shadow-sm border border-neutral-100 overflow-hidden;
+  transition: all 0.3s ease-out;
+}
+
+.service-card:hover {
+  @apply shadow-lg;
+  transform: translateY(-2px);
+}
+
+.service-card-image {
+  @apply w-full h-full object-contain;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.service-card-badge {
+  @apply inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold;
+  background: linear-gradient(135deg, rgba(61, 90, 128, 0.9) 0%, rgba(61, 90, 128, 0.8) 100%);
+  @apply text-white shadow-sm;
+}
+
+.service-card-button {
+  @apply block w-full text-center px-6 py-3 bg-primary text-white rounded-xl font-semibold;
+  background: linear-gradient(135deg, #3D5A80 0%, #98C1D9 100%);
+  transition: all 0.2s ease-out;
+}
+
+.service-card-button:hover {
+  background: linear-gradient(135deg, #2d4a70 0%, #87b0c9 100%);
+  @apply shadow-md;
+  transform: translateY(-1px);
+}

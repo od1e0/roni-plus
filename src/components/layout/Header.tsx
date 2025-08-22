@@ -1,4 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import DropdownMenu from './DropdownMenu';
+import OrderModal from '../OrderModal';
+import { Category, Service } from '../../types';
+import { CategoryService, ServiceService } from '../../services/api';
 
 interface HeaderProps {
   logo?: string;
@@ -6,6 +10,33 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ logo }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const [categoriesData, servicesData] = await Promise.all([
+          CategoryService.getCategoriesHierarchical(),
+          ServiceService.getHierarchicalServices()
+        ]);
+        setCategories(categoriesData);
+        setServices(servicesData);
+      } catch (error) {
+        console.error('Failed to fetch menu data:', error);
+        // Если не удалось загрузить данные, используем пустые массивы
+        setCategories([]);
+        setServices([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white text-neutral-800 shadow-md py-2">
@@ -31,30 +62,40 @@ const Header: React.FC<HeaderProps> = ({ logo }) => {
           
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-1">
-            <NavLink href="/products/single">Одиночные</NavLink>
-            <NavLink href="/products/double">Двойные</NavLink>
-            <NavLink href="/products/exclusive">Эксклюзивные</NavLink>
-            <NavLink href="/products/kids">Детские</NavLink>
-            <div className="group relative">
-              <button className="px-3 py-2 rounded-lg flex items-center text-neutral-800 hover:bg-neutral-100">
-                Больше
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              <div className="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <a href="/products/granite" className="block px-4 py-2 text-neutral-800 hover:bg-neutral-100">Из гранитно-мраморной крошки</a>
-                <a href="/products/complex" className="block px-4 py-2 text-neutral-800 hover:bg-neutral-100">Комплексы</a>
-                <a href="/products/art" className="block px-4 py-2 text-neutral-800 hover:bg-neutral-100">Художественное оформление</a>
-                <a href="/products/fences" className="block px-4 py-2 text-neutral-800 hover:bg-neutral-100">Ограды</a>
-                <a href="/products/vases" className="block px-4 py-2 text-neutral-800 hover:bg-neutral-100">Вазы</a>
-                <a href="/works" className="block px-4 py-2 text-neutral-800 hover:bg-neutral-100">Наши работы</a>
-              </div>
-            </div>
+            <NavLink href="/">Главная</NavLink>
+            <DropdownMenu 
+              items={categories} 
+              title="Каталог" 
+              type="category"
+              isLoading={isLoading}
+              onButtonClick={() => window.location.href = '/products'}
+            />
+            <NavLink href="/sale">Распродажа</NavLink>
+            <DropdownMenu 
+              items={services} 
+              title="Услуги" 
+              type="service"
+              isLoading={isLoading}
+              onButtonClick={() => window.location.href = '/services'}
+            />
+            <NavLink href="/works">Наши работы</NavLink>
+            <NavLink href="/about">О нас</NavLink>
+            <NavLink href="/delivery">Доставка</NavLink>
           </nav>
           
           {/* Contact Button & Mobile Menu Controls */}
           <div className="flex items-center space-x-3">
+            {/* Order Button - Desktop */}
+            <button 
+              onClick={() => setIsOrderModalOpen(true)}
+              className="hidden md:flex items-center px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 font-medium transition-all"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              Оставить заявку
+            </button>
+            
             {/* Contact Button - Desktop */}
             <a 
               href="/contact" 
@@ -106,53 +147,113 @@ const Header: React.FC<HeaderProps> = ({ logo }) => {
           <nav>
             <ul className="space-y-1">
               <li>
-                <a href="/products/single" className="block py-2.5 px-4 rounded hover:bg-neutral-100 text-neutral-700">
-                  Одиночные
+                <a href="/" className="block py-2.5 px-4 rounded-lg hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10 hover:text-primary text-neutral-700 transition-all duration-200">
+                  Главная
                 </a>
               </li>
               <li>
-                <a href="/products/double" className="block py-2.5 px-4 rounded hover:bg-neutral-100 text-neutral-700">
-                  Двойные
+                <details className="group">
+                  <summary className="flex items-center justify-between py-2.5 px-4 rounded-lg hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10 hover:text-primary text-neutral-700 cursor-pointer transition-all duration-200">
+                    <span className="font-medium break-words text-left flex-1 mr-2">Каталог</span>
+                    <svg className="w-4 h-4 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <ul className="ml-4 space-y-1 mt-1">
+                    <li>
+                      <a href="/products" className="block py-2 px-4 rounded-lg hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10 hover:text-primary text-neutral-600 transition-all duration-200 font-medium">
+                        Все товары
+                      </a>
+                    </li>
+                    {categories.map((category) => (
+                      <li key={category.id}>
+                        <details className="group">
+                          <summary className="flex items-center justify-between py-2 px-4 rounded-lg hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10 hover:text-primary text-neutral-600 cursor-pointer transition-all duration-200">
+                            <span className="font-medium break-words text-left flex-1 mr-2">{category.name}</span>
+                            {category.children && category.children.length > 0 && (
+                              <svg className="w-3 h-3 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              </svg>
+                            )}
+                          </summary>
+                          {category.children && category.children.length > 0 && (
+                            <ul className="ml-4 space-y-1 mt-1">
+                              {category.children.map((child) => (
+                                <li key={child.id}>
+                                  <a href={`/products/category/${child.id}`} className="block py-1.5 px-4 rounded-lg hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10 hover:text-primary text-neutral-500 transition-all duration-200 break-words">
+                                    {child.name}
+                                  </a>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </details>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              </li>
+              <li>
+                <a href="/sale" className="block py-2.5 px-4 rounded-lg hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10 hover:text-primary text-neutral-700 transition-all duration-200">
+                  <span className="font-medium">Распродажа</span>
+                  <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    Скидки
+                  </span>
                 </a>
               </li>
               <li>
-                <a href="/products/exclusive" className="block py-2.5 px-4 rounded hover:bg-neutral-100 text-neutral-700">
-                  Эксклюзивные
-                </a>
+                <details className="group">
+                  <summary className="flex items-center justify-between py-2.5 px-4 rounded-lg hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10 hover:text-primary text-neutral-700 cursor-pointer transition-all duration-200">
+                    <span className="font-medium break-words text-left flex-1 mr-2">Услуги</span>
+                    <svg className="w-4 h-4 transition-transform duration-200 group-open:rotate-180 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <ul className="ml-4 space-y-1 mt-1">
+                    <li>
+                      <a href="/services" className="block py-2 px-4 rounded-lg hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10 hover:text-primary text-neutral-600 transition-all duration-200 font-medium">
+                        Все услуги
+                      </a>
+                    </li>
+                    {services.map((service) => (
+                      <li key={service.id}>
+                        <a href={`/services/${service.id}`} className="block py-1.5 px-4 rounded-lg hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10 hover:text-primary text-neutral-500 transition-all duration-200 break-words">
+                          {service.name}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
               </li>
               <li>
-                <a href="/products/kids" className="block py-2.5 px-4 rounded hover:bg-neutral-100 text-neutral-700">
-                  Детские
-                </a>
-              </li>
-              <li>
-                <a href="/products/granite" className="block py-2.5 px-4 rounded hover:bg-neutral-100 text-neutral-700">
-                  Из гранитно-мраморной крошки
-                </a>
-              </li>
-              <li>
-                <a href="/products/complex" className="block py-2.5 px-4 rounded hover:bg-neutral-100 text-neutral-700">
-                  Комплексы
-                </a>
-              </li>
-              <li>
-                <a href="/products/art" className="block py-2.5 px-4 rounded hover:bg-neutral-100 text-neutral-700">
-                  Художественное оформление
-                </a>
-              </li>
-              <li>
-                <a href="/products/fences" className="block py-2.5 px-4 rounded hover:bg-neutral-100 text-neutral-700">
-                  Ограды
-                </a>
-              </li>
-              <li>
-                <a href="/products/vases" className="block py-2.5 px-4 rounded hover:bg-neutral-100 text-neutral-700">
-                  Вазы
-                </a>
-              </li>
-              <li>
-                <a href="/works" className="block py-2.5 px-4 rounded hover:bg-neutral-100 text-neutral-700">
+                <a href="/works" className="block py-2.5 px-4 rounded-lg hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10 hover:text-primary text-neutral-700 transition-all duration-200">
                   Наши работы
+                </a>
+              </li>
+              <li>
+                <a href="/about" className="block py-2.5 px-4 rounded-lg hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10 hover:text-primary text-neutral-700 transition-all duration-200">
+                  О нас
+                </a>
+              </li>
+              <li>
+                <a href="/delivery" className="block py-2.5 px-4 rounded-lg hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10 hover:text-primary text-neutral-700 transition-all duration-200">
+                  Доставка
+                </a>
+              </li>
+              <li>
+                <button 
+                  onClick={() => {
+                    setIsOrderModalOpen(true);
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full text-left block py-2.5 px-4 rounded-lg hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10 hover:text-primary text-neutral-700 transition-all duration-200"
+                >
+                  Оставить заявку
+                </button>
+              </li>
+              <li>
+                <a href="/contact" className="block py-2.5 px-4 rounded-lg hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10 hover:text-primary text-neutral-700 transition-all duration-200">
+                  Контакты
                 </a>
               </li>
             </ul>
@@ -200,6 +301,12 @@ const Header: React.FC<HeaderProps> = ({ logo }) => {
         </div>
       </div>
       
+      {/* Order Modal */}
+      <OrderModal 
+        isOpen={isOrderModalOpen} 
+        onClose={() => setIsOrderModalOpen(false)} 
+      />
+      
     </header>
   );
 };
@@ -208,7 +315,7 @@ const Header: React.FC<HeaderProps> = ({ logo }) => {
 const NavLink: React.FC<{href: string; children: React.ReactNode}> = ({href, children}) => (
   <a 
     href={href}
-    className="px-3 py-2 rounded-lg text-neutral-800 hover:bg-neutral-100 transition-colors"
+    className="px-3 py-2 rounded-lg text-neutral-800 hover:bg-neutral-100 transition-colors whitespace-nowrap"
   >
     {children}
   </a>

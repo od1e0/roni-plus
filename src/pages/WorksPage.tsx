@@ -1,100 +1,29 @@
-import React, { useState } from 'react';
-
-interface WorkItem {
-  id: string;
-  title: string;
-  imageUrl: string;
-  category: string;
-  location: string;
-  year: number;
-  description: string;
-}
+import React, { useState, useEffect } from 'react';
+import { Work } from '../types';
+import { WorksService } from '../services/api';
 
 const WorksPage: React.FC = () => {
-  // Mock portfolio data
-  const works: WorkItem[] = [
-    {
-      id: '1',
-      title: 'Одиночный памятник из черного гранита',
-      imageUrl: '/images/works/work-1.jpg',
-      category: 'single',
-      location: 'г. Ивацевичи',
-      year: 2023,
-      description: 'Элегантный одиночный памятник из черного гранита с гравировкой и золочением.'
-    },
-    {
-      id: '2',
-      title: 'Двойной памятник с розами',
-      imageUrl: '/images/works/work-2.jpg',
-      category: 'double',
-      location: 'д. Телеханы',
-      year: 2023,
-      description: 'Двойной памятник с художественной гравировкой роз и декоративными элементами.'
-    },
-    {
-      id: '3',
-      title: 'Эксклюзивный мемориальный комплекс',
-      imageUrl: '/images/works/work-3.jpg',
-      category: 'complex',
-      location: 'г. Барановичи',
-      year: 2022,
-      description: 'Комплексное решение с гранитной оградой, скамейкой и памятником из премиального гранита.'
-    },
-    {
-      id: '4',
-      title: 'Детский памятник с ангелом',
-      imageUrl: '/images/works/work-4.jpg',
-      category: 'kids',
-      location: 'г. Брест',
-      year: 2022,
-      description: 'Трогательный памятник для ребенка с фигурой ангела из светлого гранита.'
-    },
-    {
-      id: '5',
-      title: 'Художественная гравировка портрета',
-      imageUrl: '/images/works/work-5.jpg',
-      category: 'art',
-      location: 'г. Ивацевичи',
-      year: 2023,
-      description: 'Высокоточная портретная гравировка с особым вниманием к деталям.'
-    },
-    {
-      id: '6',
-      title: 'Гранитная ограда с коваными элементами',
-      imageUrl: '/images/works/work-6.jpg',
-      category: 'fences',
-      location: 'г. Пинск',
-      year: 2022,
-      description: 'Элегантная ограда из черного гранита с декоративными коваными элементами.'
-    },
-    {
-      id: '7',
-      title: 'Семейный мемориальный комплекс',
-      imageUrl: '/images/works/work-7.jpg',
-      category: 'complex',
-      location: 'г. Ивацевичи',
-      year: 2021,
-      description: 'Большой семейный комплекс с лавочкой, столиком и высоким памятником.'
-    },
-    {
-      id: '8',
-      title: 'Вазы из гранита',
-      imageUrl: '/images/works/work-8.jpg',
-      category: 'vases',
-      location: 'г. Кобрин',
-      year: 2022,
-      description: 'Комплект декоративных ваз из гранита для установки у памятника.'
-    },
-    {
-      id: '9',
-      title: 'Вертикальная стела с крестом',
-      imageUrl: '/images/works/work-9.jpg',
-      category: 'single',
-      location: 'д. Плехово',
-      year: 2023,
-      description: 'Стильная вертикальная стела с гравированным крестом и орнаментом.'
-    },
-  ];
+  const [works, setWorks] = useState<Work[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch works data from the API
+  useEffect(() => {
+    const fetchWorksData = async () => {
+      try {
+        setIsLoading(true);
+        const worksData = await WorksService.getAllWorks();
+        setWorks(worksData);
+      } catch (err) {
+        setError('Не удалось загрузить данные о работах');
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchWorksData();
+  }, []);
 
   // Filter categories
   const categories = [
@@ -109,7 +38,23 @@ const WorksPage: React.FC = () => {
   ];
 
   const [activeFilter, setActiveFilter] = useState('all');
-  const [activeWork, setActiveWork] = useState<WorkItem | null>(null);
+  const [activeWork, setActiveWork] = useState<Work | null>(null);
+
+  // Get category label
+  const getCategoryLabel = (category: string) => {
+    switch (category) {
+      case 'single': return 'Одиночные';
+      case 'double': return 'Двойные';
+      case 'exclusive': return 'Эксклюзивные';
+      case 'kids': return 'Детские';
+      case 'granite': return 'Гранитная крошка';
+      case 'complex': return 'Комплексы';
+      case 'art': return 'Художественное оформление';
+      case 'fences': return 'Ограды';
+      case 'vases': return 'Вазы';
+      default: return category;
+    }
+  };
 
   // Filter works based on selected category
   const filteredWorks = activeFilter === 'all' 
@@ -117,7 +62,7 @@ const WorksPage: React.FC = () => {
     : works.filter(work => work.category === activeFilter);
 
   // Open work modal
-  const openWorkModal = (work: WorkItem) => {
+  const openWorkModal = (work: Work) => {
     setActiveWork(work);
     document.body.classList.add('overflow-hidden');
   };
@@ -127,6 +72,36 @@ const WorksPage: React.FC = () => {
     setActiveWork(null);
     document.body.classList.remove('overflow-hidden');
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-4">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-red-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h2 className="text-2xl font-bold text-neutral-900 mb-2">
+          {error}
+        </h2>
+        <p className="text-neutral-600 mb-4">К сожалению, не удалось загрузить данные о работах.</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="btn-primary px-6 py-2"
+        >
+          Попробовать снова
+        </button>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -151,7 +126,7 @@ const WorksPage: React.FC = () => {
               <button
                 key={category.id}
                 onClick={() => setActiveFilter(category.id)}
-                className={`px-4 py-2 rounded-lg transition-colors ${
+                className={`px-4 py-2 rounded-lg transition-colors text-center break-words max-w-xs ${
                   activeFilter === category.id
                     ? 'bg-primary text-white'
                     : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
@@ -164,18 +139,35 @@ const WorksPage: React.FC = () => {
           
           {/* Works Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredWorks.length > 0 ? (
+            {works.length === 0 ? (
+              <div className="col-span-full text-center py-12">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-neutral-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                <h3 className="text-lg font-medium text-neutral-900 mb-2">Работы не найдены</h3>
+                <p className="text-neutral-600">Пока нет добавленных работ в портфолио</p>
+              </div>
+            ) : filteredWorks.length > 0 ? (
               filteredWorks.map((work) => (
                 <div
                   key={work.id}
                   className="bg-white rounded-xl overflow-hidden shadow-sm border border-neutral-200 cursor-pointer transition-all hover:shadow-md"
                   onClick={() => openWorkModal(work)}
                 >
-                  {/* Image Placeholder - In real implementation this would be the actual image */}
+                  {/* Work Image */}
                   <div className="aspect-w-4 aspect-h-3 bg-neutral-100">
-                    <div className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-100 flex items-center justify-center">
-                      <p className="text-center text-neutral-500">{work.title}</p>
-                    </div>
+                    {work.imageUrl ? (
+                      <img 
+                        src={work.imageUrl} 
+                        alt={work.title}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-100 flex items-center justify-center">
+                        <p className="text-center text-neutral-500">{work.title}</p>
+                      </div>
+                    )}
                   </div>
                   <div className="p-4">
                     <div className="flex justify-between items-start mb-2">
@@ -361,34 +353,42 @@ const WorksPage: React.FC = () => {
               
               <div className="sm:flex sm:items-start p-0">
                 <div className="sm:flex-1 sm:flex sm:flex-col">
-                  {/* Image placeholder */}
+                  {/* Work Image */}
                   <div className="aspect-w-16 aspect-h-9 bg-neutral-100">
-                    <div className="w-full h-72 bg-gradient-to-br from-neutral-200 to-neutral-100 flex items-center justify-center">
-                      <p className="text-center text-neutral-500">Изображение работы</p>
-                    </div>
+                    {activeWork.imageUrl ? (
+                      <img 
+                        src={activeWork.imageUrl} 
+                        alt={activeWork.title}
+                        className="w-full h-72 object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-72 bg-gradient-to-br from-neutral-200 to-neutral-100 flex items-center justify-center">
+                        <p className="text-center text-neutral-500">Изображение работы</p>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="p-6">
                     <div className="flex justify-between items-start mb-4">
-                      <h3 className="text-2xl font-bold text-neutral-900">{activeWork.title}</h3>
-                      <span className="text-sm bg-primary/10 text-primary px-3 py-1 rounded-full">
+                      <h3 className="text-2xl font-bold text-neutral-900 break-words leading-tight flex-1 mr-4">{activeWork.title}</h3>
+                      <span className="text-sm bg-primary/10 text-primary px-3 py-1 rounded-full flex-shrink-0">
                         {activeWork.year}
                       </span>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <p className="text-neutral-600 mb-4">{activeWork.description}</p>
+                        <p className="text-neutral-600 mb-4 break-words">{activeWork.description}</p>
                         <div className="space-y-2">
                           <div className="flex">
                             <span className="font-medium text-neutral-700 w-24">Категория:</span>
-                            <span className="text-neutral-600">
-                              {categories.find(c => c.id === activeWork.category)?.name || activeWork.category}
+                            <span className="text-neutral-600 break-words">
+                              {getCategoryLabel(activeWork.category)}
                             </span>
                           </div>
                           <div className="flex">
                             <span className="font-medium text-neutral-700 w-24">Локация:</span>
-                            <span className="text-neutral-600">{activeWork.location}</span>
+                            <span className="text-neutral-600 break-words">{activeWork.location}</span>
                           </div>
                           <div className="flex">
                             <span className="font-medium text-neutral-700 w-24">Год:</span>
@@ -460,8 +460,8 @@ const TimelineStep: React.FC<{
       <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center text-lg font-bold mb-4 z-10">
         {number}
       </div>
-      <h3 className="text-xl font-bold text-neutral-900 mb-2 text-center">{title}</h3>
-      <p className="text-neutral-600 text-center">{description}</p>
+      <h3 className="text-xl font-bold text-neutral-900 mb-2 text-center break-words leading-tight">{title}</h3>
+      <p className="text-neutral-600 text-center break-words leading-relaxed">{description}</p>
     </div>
   </div>
 );

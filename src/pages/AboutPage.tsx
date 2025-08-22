@@ -26,8 +26,8 @@ const AboutPage: React.FC = () => {
       <section className="bg-gradient-to-r from-primary to-primary-dark text-white py-12 sm:py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading">О компании</h1>
-            <p className="mt-4 text-lg text-white/80">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading break-words leading-tight">О компании</h1>
+            <p className="mt-4 text-lg text-white/80 break-words leading-relaxed">
               РоНи-плюс — ведущий производитель памятников с 15-летней историей и безупречной репутацией
             </p>
           </div>
@@ -51,7 +51,7 @@ const AboutPage: React.FC = () => {
 
             {/* Text column */}
             <div className="lg:order-1">
-              <h2 className="text-3xl font-bold font-heading text-neutral-900 mb-6">
+              <h2 className="text-3xl font-bold font-heading text-neutral-900 mb-6 break-words leading-tight">
                 История компании
               </h2>
               <div className="prose prose-lg text-neutral-600 max-w-none">
@@ -77,10 +77,10 @@ const AboutPage: React.FC = () => {
       <section className="py-12 sm:py-16 bg-neutral-50 border-t border-neutral-200">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold font-heading text-neutral-900 mb-6">
+            <h2 className="text-3xl font-bold font-heading text-neutral-900 mb-6 break-words leading-tight">
               Наша миссия
             </h2>
-            <p className="text-xl text-neutral-600 mb-8 leading-relaxed">
+            <p className="text-xl text-neutral-600 mb-8 leading-relaxed break-words">
               Помогать людям сохранять память о близких через создание качественных и долговечных памятников, 
               которые будут достойно отражать историю жизни и личность усопшего.
             </p>
@@ -97,7 +97,7 @@ const AboutPage: React.FC = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-neutral-900 mb-2">Качество</h3>
+              <h3 className="text-xl font-bold text-neutral-900 mb-2 break-words leading-tight">Качество</h3>
               <p className="text-neutral-600">
                 Мы используем только высококачественные материалы и современное оборудование для создания памятников, 
                 которые прослужат долгие годы.

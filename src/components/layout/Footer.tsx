@@ -1,9 +1,31 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Category } from '../../types';
+import { CategoryService } from '../../services/api';
 
 const Footer: React.FC = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setIsLoading(true);
+        const categoriesData = await CategoryService.getAllCategories();
+        // Берем только первые 5 категорий для футера
+        setCategories(categoriesData.slice(0, 5));
+      } catch (error) {
+        console.error('Failed to fetch categories for footer:', error);
+        setCategories([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchCategories();
+  }, []);
+
   return (
     <footer className="bg-primary-dark text-white">
-
       {/* Main footer content */}
       <div className="py-12 sm:py-16 bg-primary-dark">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -57,26 +79,55 @@ const Footer: React.FC = () => {
               </ul>
             </div>
 
-            {/* Products */}
+            {/* Products - Dynamic categories */}
             <div>
               <h3 className="text-lg font-heading font-bold mb-5">Продукция</h3>
-              <ul className="space-y-3">
-                <li>
-                  <a href="/products/single" className="text-sm text-gray-300 hover:text-white transition-colors">Одиночные памятники</a>
-                </li>
-                <li>
-                  <a href="/products/double" className="text-sm text-gray-300 hover:text-white transition-colors">Двойные памятники</a>
-                </li>
-                <li>
-                  <a href="/products/exclusive" className="text-sm text-gray-300 hover:text-white transition-colors">Эксклюзивные памятники</a>
-                </li>
-                <li>
-                  <a href="/products/granite" className="text-sm text-gray-300 hover:text-white transition-colors">Памятники из гранитной крошки</a>
-                </li>
-                <li>
-                  <a href="/products/art" className="text-sm text-gray-300 hover:text-white transition-colors">Художественное оформление</a>
-                </li>
-              </ul>
+              {isLoading ? (
+                <div className="space-y-3">
+                  {[...Array(5)].map((_, index) => (
+                    <div key={index} className="h-4 bg-gray-600/30 rounded animate-pulse"></div>
+                  ))}
+                </div>
+              ) : categories.length > 0 ? (
+                <ul className="space-y-3">
+                  {categories.map((category) => (
+                    <li key={category.id}>
+                      <a 
+                        href={`/products/category/${category.id}`} 
+                        className="text-sm text-gray-300 hover:text-white transition-colors"
+                      >
+                        {category.name}
+                      </a>
+                    </li>
+                  ))}
+                  <li>
+                    <a 
+                      href="/products" 
+                      className="text-sm text-primary-light hover:text-white transition-colors font-medium"
+                    >
+                      Все категории →
+                    </a>
+                  </li>
+                </ul>
+              ) : (
+                <ul className="space-y-3">
+                  <li>
+                    <a href="/products" className="text-sm text-gray-300 hover:text-white transition-colors">Каталог продукции</a>
+                  </li>
+                  <li>
+                    <a href="/products" className="text-sm text-gray-300 hover:text-white transition-colors">Памятники</a>
+                  </li>
+                  <li>
+                    <a href="/products" className="text-sm text-gray-300 hover:text-white transition-colors">Ограды</a>
+                  </li>
+                  <li>
+                    <a href="/products" className="text-sm text-gray-300 hover:text-white transition-colors">Вазы</a>
+                  </li>
+                  <li>
+                    <a href="/products" className="text-sm text-gray-300 hover:text-white transition-colors">Аксессуары</a>
+                  </li>
+                </ul>
+              )}
             </div>
 
             {/* Contact info */}
@@ -85,14 +136,14 @@ const Footer: React.FC = () => {
               <ul className="space-y-4">
                 <li className="flex">
                   <svg className="h-6 w-6 text-primary-light flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                   <span className="ml-3 text-sm text-gray-300">Брестская область, Ивацевичский район, д. Плехово, ул Центральная, 1</span>
                 </li>
                 <li className="flex">
                   <svg className="h-6 w-6 text-primary-light flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
                   <div className="ml-3">
                     <a href="tel:+375297912384" className="text-sm text-gray-300 hover:text-white">+375 (29) 791 23 84</a><br />
@@ -101,7 +152,7 @@ const Footer: React.FC = () => {
                 </li>
                 <li className="flex">
                   <svg className="h-6 w-6 text-primary-light flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                   <span className="ml-3">
                     <a href="mailto:info@roniplus.by" className="text-sm text-gray-300 hover:text-white">info@roniplus.by</a>
@@ -109,7 +160,7 @@ const Footer: React.FC = () => {
                 </li>
                 <li className="flex">
                   <svg className="h-6 w-6 text-primary-light flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <div className="ml-3 text-sm text-gray-300">
                     <p>Пн-Пт: 9:00 - 18:00</p>
@@ -125,10 +176,6 @@ const Footer: React.FC = () => {
           <div className="mt-12 pt-8 border-t border-gray-700/50">
             <div className="flex flex-col md:flex-row justify-between items-center">
               <p className="text-sm text-gray-400">&copy; {new Date().getFullYear()} РоНи-плюс. Все права защищены.</p>
-              <div className="mt-4 md:mt-0 flex space-x-6">
-                <a href="/privacy" className="text-sm text-gray-400 hover:text-white transition-colors">Политика конфиденциальности</a>
-                <a href="/terms" className="text-sm text-gray-400 hover:text-white transition-colors">Условия использования</a>
-              </div>
             </div>
           </div>
         </div>

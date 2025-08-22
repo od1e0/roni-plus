@@ -1,6 +1,40 @@
-# React + TypeScript + Vite
+# Roni Plus - Строительная компания
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Веб-сайт строительной компании Roni Plus, построенный на React + TypeScript + Vite.
+
+## 🚀 Быстрый старт
+
+```bash
+# Установка зависимостей
+npm install
+
+# Запуск в режиме разработки
+npm run dev
+
+# Сборка для продакшена
+npm run build
+
+# Предварительный просмотр сборки
+npm run preview
+```
+
+## 🔗 API Configuration
+
+Сайт настроен для работы с API на: **https://roni-plus-server.onrender.com/api**
+
+### Переключение между окружениями
+
+Для изменения API URL отредактируйте файл `src/config/api.ts`:
+
+```typescript
+export const API_CONFIG = {
+  PRODUCTION: 'https://roni-plus-server.onrender.com/api',
+  LOCAL: 'http://localhost:3000/api',
+  CURRENT: 'https://roni-plus-server.onrender.com/api' // Измените эту строку
+};
+```
+
+Подробная документация по настройке API: [API_SETUP.md](./API_SETUP.md)
 
 Currently, two official plugins are available:
 

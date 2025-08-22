@@ -1,4 +1,5 @@
 import React from 'react';
+import OrderForm from '../components/OrderForm';
 
 const ContactPage: React.FC = () => {
   return (
@@ -7,8 +8,8 @@ const ContactPage: React.FC = () => {
       <section className="bg-gradient-to-r from-primary to-primary-dark text-white py-12 sm:py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading">Контакты</h1>
-            <p className="mt-4 text-lg text-white/80">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading break-words leading-tight">Контакты</h1>
+            <p className="mt-4 text-lg text-white/80 break-words leading-relaxed">
               Свяжитесь с нами любым удобным способом. Мы всегда готовы ответить на ваши вопросы и помочь с выбором.
             </p>
           </div>
@@ -18,12 +19,12 @@ const ContactPage: React.FC = () => {
       {/* Contact Information, Map and Form - All in One Row */}
       <section className="py-12 sm:py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold font-heading text-neutral-900 mb-8">Как нас найти</h2>
+          <h2 className="text-2xl font-bold font-heading text-neutral-900 mb-8 break-words leading-tight">Как нас найти</h2>
           
-          {/* Three-column layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Map - Takes 5 columns */}
-            <div className="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden flex flex-col h-[600px]">
+                     {/* Three-column layout */}
+           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+                         {/* Map - Takes 5 columns */}
+             <div className="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden flex flex-col h-[400px] sm:h-[500px] lg:h-[600px]">
               {/* Interactive Yandex Map */}
               <div className="h-full relative flex-grow">
                 <iframe
@@ -53,11 +54,11 @@ const ContactPage: React.FC = () => {
             
             {/* Contact Information - Takes 3 columns */}
             <div className="lg:col-span-3 bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden p-6">
-              <h3 className="text-xl font-bold text-neutral-900 mb-6 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <h3 className="text-xl font-bold text-neutral-900 mb-6 flex items-center break-words leading-tight">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-primary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
-                Контактная информация
+                <span className="break-words">Контактная информация</span>
               </h3>
               
               <div className="space-y-4">
@@ -70,7 +71,7 @@ const ContactPage: React.FC = () => {
                   </div>
                   <div className="ml-3">
                     <p className="text-neutral-800 font-medium">Адрес:</p>
-                    <p className="text-neutral-600 text-sm">
+                    <p className="text-neutral-600 text-sm break-words">
                       Брестская область, Ивацевичский район,<br />
                       д. Плехово, ул Центральная, 1
                     </p>
@@ -157,87 +158,7 @@ const ContactPage: React.FC = () => {
               <div className="p-6">
                 <h3 className="text-xl font-bold text-neutral-900 mb-6">Оставить заявку</h3>
                 
-                <form className="space-y-4">
-                  <div>
-                    <label htmlFor="first-name" className="block text-sm font-medium text-neutral-700 mb-1">
-                      Имя
-                    </label>
-                    <input
-                      type="text"
-                      name="first-name"
-                      id="first-name"
-                      autoComplete="given-name"
-                      className="form-input w-full"
-                      placeholder="Иван"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-neutral-700 mb-1">
-                      Телефон
-                    </label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      id="phone"
-                      autoComplete="tel"
-                      className="form-input w-full"
-                      placeholder="+375 (xx) xxx-xx-xx"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-1">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      id="email"
-                      autoComplete="email"
-                      className="form-input w-full"
-                      placeholder="example@mail.com"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-neutral-700 mb-1">
-                      Сообщение
-                    </label>
-                    <textarea
-                      id="message"
-                      name="message"
-                      rows={4}
-                      className="form-input w-full resize-none"
-                      placeholder="Напишите ваш вопрос или запрос здесь..."
-                    ></textarea>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <div className="flex items-center h-5">
-                      <input
-                        id="privacy"
-                        name="privacy"
-                        type="checkbox"
-                        className="h-4 w-4 text-primary border-neutral-300 rounded focus:ring-primary"
-                      />
-                    </div>
-                    <div className="ml-3 text-xs">
-                      <label htmlFor="privacy" className="text-neutral-600">
-                        Я согласен с <a href="/privacy" className="text-primary hover:text-primary-dark">политикой конфиденциальности</a>
-                      </label>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-end">
-                    <button
-                      type="submit"
-                      className="btn-primary py-2.5 px-8"
-                    >
-                      Отправить
-                    </button>
-                  </div>
-                </form>
+                <OrderForm />
               </div>
             </div>
           </div>
