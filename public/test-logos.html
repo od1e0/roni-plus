@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест логотипов РоНи-плюс</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .logo-test {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .logo-test h3 {
+            color: #059669;
+            margin-bottom: 15px;
+        }
+        .logo-display {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 10px 0;
+            text-align: center;
+            background: white;
+        }
+        .logo-display img {
+            max-width: 100%;
+            height: auto;
+        }
+        .fallback {
+            background: #f0fdf4;
+            border: 2px solid #10b981;
+            padding: 15px;
+            border-radius: 8px;
+            color: #059669;
+            font-weight: bold;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Тест логотипов РоНи-плюс</h1>
+    
+    <div class="logo-test">
+        <h3>1. Графический логотип (logo.svg)</h3>
+        <div class="logo-display">
+            <img src="/logo.svg" alt="Графический логотип РоНи-плюс" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div class="fallback" style="display: none;">РоНи-плюс (Fallback)</div>
+        </div>
+    </div>
+    
+    <div class="logo-test">
+        <h3>2. Простой логотип (logo-simple.svg)</h3>
+        <div class="logo-display">
+            <img src="/logo-simple.svg" alt="Простой логотип РоНи-плюс" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div class="fallback" style="display: none;">РоНи-плюс (Fallback)</div>
+        </div>
+    </div>
+    
+    <div class="logo-test">
+        <h3>3. Текстовый логотип (logo-text.svg)</h3>
+        <div class="logo-display">
+            <img src="/logo-text.svg" alt="Текстовый логотип РоНи-плюс" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div class="fallback" style="display: none;">РоНи-плюс (Fallback)</div>
+        </div>
+    </div>
+    
+    <div class="logo-test">
+        <h3>4. Тест в Header (имитация)</h3>
+        <div class="logo-display" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
+                <img src="/logo-simple.svg" alt="Логотип в Header" style="height: 40px; width: auto;">
+                <div style="color: #64748b;">Навигация</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Проверка загрузки логотипов
+        window.addEventListener('load', function() {
+            const images = document.querySelectorAll('img');
+            images.forEach(img => {
+                if (img.complete && img.naturalHeight === 0) {
+                    img.style.display = 'none';
+                    const fallback = img.nextElementSibling;
+                    if (fallback) fallback.style.display = 'block';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

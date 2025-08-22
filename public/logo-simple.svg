@@ -1,0 +1,12 @@
+<svg width="120" height="60" viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+  <!-- Простой прямоугольный фон -->
+  <rect x="2" y="8" width="116" height="44" rx="8" fill="#f0fdf4" stroke="#10b981" stroke-width="2"/>
+  
+  <!-- Текст "РоНи-плюс" -->
+  <text x="60" y="35" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="#059669">
+    РоНи-плюс
+  </text>
+  
+  <!-- Декоративная линия -->
+  <line x1="15" y1="42" x2="105" y2="42" stroke="#10b981" stroke-width="1.5"/>
+</svg>

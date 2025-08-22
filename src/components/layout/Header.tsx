@@ -41,22 +41,20 @@ const Header: React.FC<HeaderProps> = ({ logo }) => {
   return (
     <header className="sticky top-0 z-50 w-full bg-white text-neutral-800 shadow-md py-2">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center">
-          {/* Skip to content link for accessibility */}
-          <a href="#main-content" className="sr-only focus:not-sr-only focus:p-2 focus:bg-primary focus:text-white absolute z-50">
-            Перейти к содержимому
-          </a>
-          
+        <div className="flex justify-between items-center">          
           {/* Logo and Company Name */}
-          <div className="flex items-center space-x-2">
-            <a href="/" className="flex items-center space-x-3">
-              {logo ? (
-                <img src={logo} alt="РоНи-плюс" className="h-12 sm:h-14 w-auto" />
-              ) : (
-                <div className="text-2xl xs:text-3xl lg:text-4xl font-heading font-bold text-primary">
-                  РоНи-плюс
-                </div>
+          <div className="flex items-center">
+            <a href="/" className="flex items-center space-x-1">
+              {logo && (
+                <img 
+                  src={logo} 
+                  alt="Логотип РоНи-плюс" 
+                  className="h-10 w-auto sm:h-12 md:h-14 transition-all duration-200 hover:scale-105" 
+                />
               )}
+              <div className="text-2xl xs:text-3xl lg:text-4xl font-heading font-bold text-primary">
+                РоНи-плюс
+              </div>
             </a>
           </div>
           
@@ -131,7 +129,16 @@ const Header: React.FC<HeaderProps> = ({ logo }) => {
         isMenuOpen ? 'translate-x-0' : 'translate-x-full'
       }`}>
         <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="font-heading font-bold text-lg text-neutral-800">Меню</h2>
+          <div className="flex items-center space-x-2">
+            {logo && (
+              <img 
+                src={logo} 
+                alt="Логотип РоНи-плюс" 
+                className="h-6 w-auto" 
+              />
+            )}
+            <h2 className="font-heading font-bold text-lg text-neutral-800">Меню</h2>
+          </div>
           <button 
             onClick={() => setIsMenuOpen(false)} 
             className="p-2 text-neutral-500 hover:text-neutral-700"

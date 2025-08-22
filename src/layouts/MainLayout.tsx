@@ -14,7 +14,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     <AccessibilityProvider>
       <div className="min-h-screen flex flex-col bg-neutral-50">
         <TopPanel />
-        <Header />
+        <Header logo="/logo.svg" />
         <main className="flex-grow w-full">
           {/* Skip link target */}
           <div id="main-content" className="sr-only" tabIndex={-1}></div>
