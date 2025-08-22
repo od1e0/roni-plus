@@ -29,6 +29,7 @@ const ProductsPage: React.FC = () => {
 
   useEffect(() => {
     const fetchProducts = async () => {
+      if (!token) return;
       try {
         const data = await AdminService.getAdminProducts(token);
         setProducts(data);
@@ -41,6 +42,7 @@ const ProductsPage: React.FC = () => {
     };
     
     const fetchCategories = async () => {
+      if (!token) return;
       try {
         const data = await AdminService.getAdminCategories(token);
         setCategories(data);
@@ -55,6 +57,11 @@ const ProductsPage: React.FC = () => {
 
   const handleDeleteProduct = async (id: string) => {
     if (!window.confirm('Вы уверены, что хотите удалить этот товар?')) {
+      return;
+    }
+    
+    if (!token) {
+      setError('Токен авторизации не найден');
       return;
     }
     

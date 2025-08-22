@@ -237,7 +237,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {/* Categories Tags - Show all categories */}
         {product.categories && product.categories.length > 0 && (
           <div className="mb-4 flex flex-wrap gap-1.5">
-            {product.categories.slice(0, 3).map((categoryId, index) => {
+            {product.categories.slice(0, 3).map((categoryId) => {
               const category = categories.find(cat => cat.id === categoryId);
               if (category) {
                 return (

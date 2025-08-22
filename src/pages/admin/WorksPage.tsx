@@ -1,33 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { WorksService } from '../../services/api';
-
-interface Work {
-  id: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+import type { Work } from '../../types';
 
 const AdminWorksPage: React.FC = () => {
+  const { token } = useAuth();
   const [works, setWorks] = useState<Work[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const { token } = useAuth();
-  const navigate = useNavigate();
-  
-  // Form state for adding/editing works
-  const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
-  const [formTitle, setFormTitle] = useState<string>('');
-  const [formDescription, setFormDescription] = useState<string>('');
-  const [formImageUrl, setFormImageUrl] = useState<string>('');
-  const [formImageFile, setFormImageFile] = useState<File | null>(null);
-  const [formPreview, setFormPreview] = useState<string>('');
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [newWork, setNewWork] = useState<Partial<Work>>({});
+  const [showForm, setShowForm] = useState(false);
 
   // Fetch works on component mount
   useEffect(() => {
@@ -51,43 +34,39 @@ const AdminWorksPage: React.FC = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setFormImageFile(file);
       // Create a preview
       const reader = new FileReader();
       reader.onload = () => {
-        setFormPreview(reader.result as string);
+        setNewWork(prev => ({ ...prev, imageUrl: reader.result as string }));
       };
       reader.readAsDataURL(file);
     }
   };
 
   const resetForm = () => {
-    setFormTitle('');
-    setFormDescription('');
-    setFormImageUrl('');
-    setFormImageFile(null);
-    setFormPreview('');
+    setNewWork({});
     setEditingId(null);
-    setIsFormOpen(false);
+    setShowForm(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formTitle || (!formImageUrl && !formPreview)) {
+    if (!newWork.title || !newWork.imageUrl) {
       setError('Заполните обязательные поля: название и изображение');
       return;
     }
 
+    if (!token) {
+      setError('Токен авторизации не найден');
+      return;
+    }
+
     try {
-      // In a real app, you'd upload the image file to a server/cloud storage first
-      // and get back a URL. For now, we'll use the preview URL or direct URL.
-      const imageUrl = formPreview || formImageUrl;
-      
       const workData = {
-        title: formTitle,
-        description: formDescription,
-        imageUrl
+        title: newWork.title!,
+        description: newWork.description || '',
+        imageUrl: newWork.imageUrl!
       };
 
       if (editingId) {
@@ -108,23 +87,32 @@ const AdminWorksPage: React.FC = () => {
   };
 
   const handleEdit = (work: Work) => {
-    setFormTitle(work.title);
-    setFormDescription(work.description || '');
-    setFormImageUrl(work.imageUrl);
-    setFormPreview(work.imageUrl);
+    setNewWork({
+      title: work.title,
+      description: work.description || '',
+      imageUrl: work.imageUrl
+    });
     setEditingId(work.id);
-    setIsFormOpen(true);
+    setShowForm(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Вы уверены, что хотите удалить эту работу?')) {
-      try {
-        await WorksService.deleteWork(id, token);
-        await fetchWorks();
-      } catch (err) {
-        console.error('Error deleting work:', err);
-        setError('Не удалось удалить работу');
-      }
+  const handleDeleteWork = async (id: string) => {
+    if (!window.confirm('Вы уверены, что хотите удалить эту работу?')) {
+      return;
+    }
+
+    if (!token) {
+      setError('Токен авторизации не найден');
+      return;
+    }
+
+    try {
+      await WorksService.deleteWork(id, token);
+      setWorks(works.filter(work => work.id !== id));
+      setError(null);
+    } catch (err) {
+      console.error('Error deleting work:', err);
+      setError('Не удалось удалить работу');
     }
   };
 
@@ -133,7 +121,7 @@ const AdminWorksPage: React.FC = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Управление работами</h1>
         <button
-          onClick={() => setIsFormOpen(true)}
+          onClick={() => setShowForm(true)}
           className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors"
         >
           Добавить работу
@@ -148,7 +136,7 @@ const AdminWorksPage: React.FC = () => {
       )}
 
       {/* Form for adding/editing works */}
-      {isFormOpen && (
+      {showForm && (
         <div className="bg-white p-6 rounded-lg shadow-md mb-6">
           <h2 className="text-xl font-bold mb-4">
             {editingId ? 'Редактировать работу' : 'Добавить новую работу'}
@@ -161,8 +149,8 @@ const AdminWorksPage: React.FC = () => {
               </label>
               <input
                 type="text"
-                value={formTitle}
-                onChange={(e) => setFormTitle(e.target.value)}
+                value={newWork.title || ''}
+                onChange={(e) => setNewWork(prev => ({ ...prev, title: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 required
               />
@@ -173,8 +161,8 @@ const AdminWorksPage: React.FC = () => {
                 Описание
               </label>
               <textarea
-                value={formDescription}
-                onChange={(e) => setFormDescription(e.target.value)}
+                value={newWork.description || ''}
+                onChange={(e) => setNewWork(prev => ({ ...prev, description: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary min-h-[100px]"
               ></textarea>
             </div>
@@ -184,10 +172,10 @@ const AdminWorksPage: React.FC = () => {
                 Изображение *
               </label>
               <div className="flex items-center space-x-4">
-                {formPreview && (
+                {newWork.imageUrl && (
                   <div className="w-32 h-32 bg-gray-100 border rounded-md overflow-hidden">
                     <img 
-                      src={formPreview} 
+                      src={newWork.imageUrl} 
                       alt="Preview" 
                       className="w-full h-full object-cover"
                     />
@@ -205,8 +193,8 @@ const AdminWorksPage: React.FC = () => {
                   </p>
                   <input
                     type="text"
-                    value={formImageUrl}
-                    onChange={(e) => setFormImageUrl(e.target.value)}
+                    value={newWork.imageUrl || ''}
+                    onChange={(e) => setNewWork(prev => ({ ...prev, imageUrl: e.target.value }))}
                     placeholder="https://example.com/image.jpg"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary mt-1"
                   />
@@ -256,9 +244,7 @@ const AdminWorksPage: React.FC = () => {
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Описание
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Дата добавления
-                </th>
+
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Действия
                 </th>
@@ -282,11 +268,7 @@ const AdminWorksPage: React.FC = () => {
                   <td className="px-6 py-4">
                     <div className="text-sm text-gray-500 line-clamp-2">{work.description}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">
-                      {new Date(work.createdAt).toLocaleDateString()}
-                    </div>
-                  </td>
+
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
                       onClick={() => handleEdit(work)}
@@ -295,7 +277,7 @@ const AdminWorksPage: React.FC = () => {
                       Редактировать
                     </button>
                     <button
-                      onClick={() => handleDelete(work.id)}
+                      onClick={() => handleDeleteWork(work.id)}
                       className="text-red-600 hover:text-red-800"
                     >
                       Удалить

@@ -150,10 +150,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ isEditing = false }) => {
     if (index < imageFiles.length) {
       setImageFiles(prev => prev.filter((_, i) => i !== index));
     } else {
-      // If it's a URL, remove from imageUrls
+      // If it's a URL, remove from previewUrls
       const urlIndex = index - imageFiles.length;
-      // This part of the logic is no longer needed as imageUrls is removed
-      // setImageUrls(prev => prev.filter((_, i) => i !== urlIndex));
+      if (urlIndex >= 0 && urlIndex < previewUrls.length) {
+        setPreviewUrls(prev => prev.filter((_, i) => i !== urlIndex));
+      }
     }
   };
 

@@ -18,7 +18,7 @@ const OrderNotification: React.FC<OrderNotificationProps> = ({ onNewOrder }) => 
     
     try {
       const orders = await OrderService.getAllOrders(token);
-      const newOrders = orders.filter(order => order.status === 'new');
+      const newOrders = orders.filter((order: any) => order.status === 'new');
       const currentCount = newOrders.length;
       
       // If we have new orders and the count increased

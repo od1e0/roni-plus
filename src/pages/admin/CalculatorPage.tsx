@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { CalculatorService } from '../../services/calculator';
+import { CalculatorServiceClass } from '../../services/calculator';
 import type { CalculatorPart, CalculatorMaterial, CalculatorSize, CalculatorService } from '../../types';
 
 const CalculatorPage: React.FC = () => {
@@ -54,8 +54,8 @@ const CalculatorPage: React.FC = () => {
     try {
       setIsLoading(true);
       const [partsData, servicesData] = await Promise.all([
-        CalculatorService.getParts(),
-        CalculatorService.getServices()
+        CalculatorServiceClass.getParts(),
+        CalculatorServiceClass.getServices()
       ]);
       
       setParts(partsData);
@@ -86,7 +86,7 @@ const CalculatorPage: React.FC = () => {
     if (!newPart.name) return;
     
     try {
-      const part = await CalculatorService.addPart({
+      const part = await CalculatorServiceClass.addPart({
         name: newPart.name,
         description: newPart.description,
         isActive: true,
@@ -112,7 +112,7 @@ const CalculatorPage: React.FC = () => {
     if (!editingPart) return;
     
     try {
-      await CalculatorService.updatePart(editingPart);
+      await CalculatorServiceClass.updatePart(editingPart);
       setParts(prev => prev.map(p => 
         p.id === editingPart.id ? editingPart : p
       ));
@@ -128,7 +128,7 @@ const CalculatorPage: React.FC = () => {
     if (!window.confirm('Вы уверены, что хотите удалить эту часть памятника?')) return;
     
     try {
-      await CalculatorService.deletePart(id);
+      await CalculatorServiceClass.deletePart(id);
       setParts(prev => prev.filter(p => p.id !== id));
       setError(null);
     } catch (error) {
@@ -142,7 +142,7 @@ const CalculatorPage: React.FC = () => {
       const part = parts.find(p => p.id === id);
       if (part) {
         const updatedPart = { ...part, isActive: !part.isActive };
-        await CalculatorService.updatePart(updatedPart);
+        await CalculatorServiceClass.updatePart(updatedPart);
         setParts(prev => prev.map(p => 
           p.id === id ? updatedPart : p
         ));
@@ -164,7 +164,7 @@ const CalculatorPage: React.FC = () => {
     }
     
     try {
-      const material = await CalculatorService.addMaterial({
+      await CalculatorServiceClass.addMaterial({
         name: newMaterial.name,
         origin: newMaterial.origin,
         isActive: true,
@@ -194,7 +194,7 @@ const CalculatorPage: React.FC = () => {
     if (!editingMaterial || !editingMaterialPartId) return;
     
     try {
-      await CalculatorService.updateMaterial(editingMaterial, editingMaterialPartId);
+      await CalculatorServiceClass.updateMaterial(editingMaterial, editingMaterialPartId);
       // Обновляем данные
       await fetchCalculatorData();
       setEditingMaterial(null);
@@ -217,7 +217,7 @@ const CalculatorPage: React.FC = () => {
         return;
       }
       
-      await CalculatorService.deleteMaterial(id, part.id);
+      await CalculatorServiceClass.deleteMaterial(id, part.id);
       // Обновляем данные
       await fetchCalculatorData();
       setError(null);
@@ -239,7 +239,7 @@ const CalculatorPage: React.FC = () => {
           return;
         }
         
-        await CalculatorService.updateMaterial(updatedMaterial, part.id);
+        await CalculatorServiceClass.updateMaterial(updatedMaterial, part.id);
         // Обновляем данные
         await fetchCalculatorData();
         setError(null);
@@ -260,7 +260,7 @@ const CalculatorPage: React.FC = () => {
     }
     
     try {
-      const size = await CalculatorService.addSize({
+      await CalculatorServiceClass.addSize({
         name: newSize.name,
         dimensions: newSize.dimensions,
         price: parseFloat(newSize.price),
@@ -291,7 +291,7 @@ const CalculatorPage: React.FC = () => {
     if (!editingSize || !editingSizePartId) return;
     
     try {
-      await CalculatorService.updateSize(editingSize, editingSizePartId);
+      await CalculatorServiceClass.updateSize(editingSize, editingSizePartId);
       // Обновляем данные
       await fetchCalculatorData();
       setEditingSize(null);
@@ -314,7 +314,7 @@ const CalculatorPage: React.FC = () => {
         return;
       }
       
-      await CalculatorService.deleteSize(id, part.id);
+      await CalculatorServiceClass.deleteSize(id, part.id);
       // Обновляем данные
       await fetchCalculatorData();
       setError(null);
@@ -336,7 +336,7 @@ const CalculatorPage: React.FC = () => {
           return;
         }
         
-        await CalculatorService.updateSize(updatedSize, part.id);
+        await CalculatorServiceClass.updateSize(updatedSize, part.id);
         // Обновляем данные
         await fetchCalculatorData();
         setError(null);
@@ -352,7 +352,7 @@ const CalculatorPage: React.FC = () => {
     if (!newService.name || !newService.price) return;
     
     try {
-      const service = await CalculatorService.addService({
+      const service = await CalculatorServiceClass.addService({
         name: newService.name,
         price: parseFloat(newService.price),
         isActive: true,
@@ -376,7 +376,7 @@ const CalculatorPage: React.FC = () => {
     if (!editingService) return;
     
     try {
-      await CalculatorService.updateService(editingService);
+      await CalculatorServiceClass.updateService(editingService);
       setServices(prev => prev.map(s => 
         s.id === editingService.id ? editingService : s
       ));
@@ -392,7 +392,7 @@ const CalculatorPage: React.FC = () => {
     if (!window.confirm('Вы уверены, что хотите удалить эту услугу?')) return;
     
     try {
-      await CalculatorService.deleteService(id);
+      await CalculatorServiceClass.deleteService(id);
       setServices(prev => prev.filter(s => s.id !== id));
       setError(null);
     } catch (error) {
@@ -405,8 +405,11 @@ const CalculatorPage: React.FC = () => {
     try {
       const service = services.find(s => s.id === id);
       if (service) {
-        const updatedService = { ...service, isActive: !service.isActive };
-        await CalculatorService.updateService(updatedService);
+        const updatedService: CalculatorService = { 
+          ...service, 
+          isActive: !service.isActive 
+        };
+        await CalculatorServiceClass.updateService(updatedService);
         setServices(prev => prev.map(s => 
           s.id === id ? updatedService : s
         ));

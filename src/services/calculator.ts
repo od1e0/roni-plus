@@ -10,7 +10,7 @@ interface CalculatorData {
   services: CalculatorService[];
 }
 
-export class CalculatorService {
+export class CalculatorServiceClass {
   private static getDefaultData(): CalculatorData {
     return {
       parts: [
@@ -111,7 +111,7 @@ export class CalculatorService {
             Array.isArray(parsedData.parts) && 
             Array.isArray(parsedData.services)) {
           // Дополнительная проверка, что каждая часть имеет материалы и размеры
-          const hasValidParts = parsedData.parts.every(part => 
+          const hasValidParts = parsedData.parts.every((part: any) => 
             part && Array.isArray(part.materials) && Array.isArray(part.sizes)
           );
           if (hasValidParts) {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { TelegramService } from '../services/telegram';
 import type { Order } from '../types';
 

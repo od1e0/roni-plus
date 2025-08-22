@@ -554,20 +554,6 @@ const ProductsPage: React.FC = () => {
   // Calculate total pages
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
-  const handleCategoryChange = (categoryId: string) => {
-    if (categoryId === activeCategory) return;
-
-    setActiveCategory(categoryId);
-
-    if (categoryId === "all") {
-      navigate("/products");
-    } else {
-      // Use category ID directly for navigation
-      navigate(`/products/category/${categoryId}`);
-    }
-
-    setIsFilterOpen(false);
-  };
 
   const goToPage = (page: number) => {
     if (page < 1) page = 1;

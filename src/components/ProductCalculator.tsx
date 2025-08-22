@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { CalculatorPart, CalculatorMaterial, CalculatorSize, CalculatorService, CalculatorSelection, CalculatorOrderData } from '../types';
-import { CalculatorService as CalculatorServiceClass } from '../services/calculator';
+import { CalculatorServiceClass } from '../services/calculator';
 
 interface ProductCalculatorProps {
   onAddToOrder?: (options: CalculatorSelection[]) => void;

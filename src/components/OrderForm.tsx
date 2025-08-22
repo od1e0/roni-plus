@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { OrderService } from '../services/api';
-import type { CalculatorSelection, CalculatorOrderData } from '../types';
+import type { CalculatorOrderData } from '../types';
 
-// Функция для генерации уникального ID
-const generateOrderId = (): string => {
-  const timestamp = Date.now().toString(36);
-  const randomStr = Math.random().toString(36).substring(2, 8);
-  return `order_${timestamp}_${randomStr}`;
-};
+
 
 interface OrderFormProps {
   onSubmit?: () => void;
@@ -24,7 +19,6 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit, className = '', calcula
     message: '',
     source: calculatorData ? 'Калькулятор' : 'Форма заявки'
   });
-  const [orderId, setOrderId] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
@@ -56,7 +50,6 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit, className = '', calcula
       ...prev,
       source: source || (calculatorData ? 'Калькулятор' : 'Форма заявки')
     }));
-    setOrderId(generateOrderId());
   }, [calculatorData, source]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
